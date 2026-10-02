@@ -55,8 +55,10 @@ export default class WorkshopService extends cds.ApplicationService {
       const { itemType_code, part_ID, quantity } = { ...itemDefaults, ...existing, ...item }
       if (!(Number(quantity) > 0)) req.reject(400, 'QUANTITY_NOT_POSITIVE')
 
-      // A new item gets the current price; later changes to quantity or description keep it
-      const repriced = !existing || 'itemType_code' in item || 'part_ID' in item
+      // A new item gets the current price. Later saves keep it, unless the item switches to a
+      // different part or type. Values are compared, because Fiori sends unchanged fields too.
+      const changed = field => field in item && item[field] !== existing[field]
+      const repriced = !existing || changed('itemType_code') || changed('part_ID')
       let unitPrice = existing?.unitPrice
 
       if (itemType_code === 'PART') {
@@ -78,6 +80,10 @@ export default class WorkshopService extends cds.ApplicationService {
       item.unitPrice = unitPrice
       item.lineTotal = multiply(quantity, unitPrice)
     }
+
+    // Order updates that really change the mechanic (noted before the update, when the old value
+    // is still known), so that only those reprice the labor afterwards
+    const mechanicChanged = new WeakSet()
 
     // Labor is charged at the rate of the order's current mechanic
     const repriceLabor = async (req, orderID, mechanicID) => {
@@ -230,6 +236,7 @@ export default class WorkshopService extends cds.ApplicationService {
         }
       }
       // Checked only when the values change, so re-saving an order as it is always works
+      if (merged.mechanic_ID !== order.mechanic_ID) mechanicChanged.add(req)
       if (merged.mechanic_ID && merged.mechanic_ID !== order.mechanic_ID) await assertActiveMechanic(req, merged.mechanic_ID)
       if (merged.mileageAtIntake !== order.mileageAtIntake || merged.vehicle_ID !== order.vehicle_ID) {
         await assertIntakeMileage(req, merged.vehicle_ID, merged.mileageAtIntake)
@@ -244,7 +251,7 @@ export default class WorkshopService extends cds.ApplicationService {
     this.before('DELETE', ServiceOrders, req => lockOrder(req, 'OPEN'))
 
     this.after(['CREATE', 'UPDATE'], ServiceOrders, async (_, req) => {
-      if (req.event === 'UPDATE' && 'mechanic_ID' in req.data) await repriceLabor(req, req.data.ID, req.data.mechanic_ID)
+      if (mechanicChanged.has(req)) await repriceLabor(req, req.data.ID, req.data.mechanic_ID)
       await updateTotals(req.data.ID)
     })
 
