@@ -1,3 +1,6 @@
+# car-workshop
+SAP CAP + Node.js project for a car workshop
+
 # Getting Started
 
 Welcome to your new CAP project.
