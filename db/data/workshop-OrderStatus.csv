@@ -1,0 +1,6 @@
+code;name;descr;criticality
+OPEN;Open;Order received, work not started yet;0
+IN_PROGRESS;In Progress;A mechanic is working on the vehicle;2
+COMPLETED;Completed;Repair finished, parts deducted from stock;3
+INVOICED;Invoiced;Customer has been billed;3
+CANCELLED;Cancelled;Order was cancelled;1
