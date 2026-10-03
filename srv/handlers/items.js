@@ -3,8 +3,7 @@ import { lockOrder } from '../lib/lock-order.js'
 import { multiply } from '../lib/utils.js'
 import { hourlyRate } from './mechanics.js'
 
-// Items edited one at a time: /ServiceOrders(ID)/items(...).
-// Items sent along with their order (deep insert/update) are handled in orders.js.
+// Items edited one at a time: /ServiceOrders(ID)/items(...)
 export default function (srv) {
   const { ServiceOrderItems } = srv.entities
 
@@ -17,21 +16,16 @@ export default function (srv) {
   srv.after(['CREATE', 'UPDATE', 'DELETE'], ServiceOrderItems, (_, req) => updateTotals(req.params[0].ID))
 }
 
-// Validates an item and sets its unitPrice and lineTotal. `item` is the incoming data
-// and is changed in place; `existing` is the stored item when updating one.
+// Validates an item and sets its price
 export async function prepareItem(req, order, item, existing) {
   const { ServiceOrderItems, Parts } = cds.entities('workshop')
 
-  // Default values from the model (e.g. itemType PART, quantity 1). The database applies
-  // them only on INSERT, so they're not yet in req.data when our handlers run.
   const defaults = Object.fromEntries(Object.values(ServiceOrderItems.elements)
     .filter(e => e.default?.val !== undefined).map(e => [e.name, e.default.val]))
 
   const { itemType_code, part_ID, quantity } = { ...defaults, ...existing, ...item }
   if (!(Number(quantity) > 0)) req.reject(400, 'QUANTITY_NOT_POSITIVE')
 
-  // A new item gets the current price. Later saves keep it, unless the item switches to a
-  // different part or type. Values are compared, because Fiori sends unchanged fields too.
   const changed = field => field in item && item[field] !== existing[field]
   const repriced = !existing || changed('itemType_code') || changed('part_ID')
   let unitPrice = existing?.unitPrice
@@ -41,13 +35,10 @@ export async function prepareItem(req, order, item, existing) {
     if (!Number.isInteger(Number(quantity))) req.reject(400, 'PART_WHOLE_PIECES')
     if (repriced) {
       const part = await SELECT.one.from(Parts, part_ID).columns('name', 'unitPrice')
-      // SAFETY NET: normally caught earlier by @assert.target on `part`. Only data that bypassed
-      // the service gets here; without this, `part.unitPrice` below would fail with a 500.
+      // SAFETY NET: @assert.target already checks this
       if (!part) req.reject(400, 'PART_NOT_FOUND')
       unitPrice = part.unitPrice
 
-      // The description defaults to the part's name. When the part is switched, a description filled
-      // in that way follows the new part; one typed in by hand, or sent with this change, is kept.
       const fill = !existing || changed('description') ? !item.description : await describedByPart(existing)
       if (fill) item.description = part.name
     }
@@ -55,8 +46,7 @@ export async function prepareItem(req, order, item, existing) {
     if (part_ID) req.reject(400, 'LABOR_WITH_PART')
     if (repriced) unitPrice = await hourlyRate(req, order.mechanic_ID)
   } else {
-    // SAFETY NET: normally caught earlier by @assert.target on `itemType`. Only data that bypassed
-    // the service gets here; without this, the item would get no price and an invalid line total.
+    // SAFETY NET: @assert.target already checks this
     req.reject(400, 'UNKNOWN_ITEM_TYPE', [itemType_code])
   }
 
@@ -64,7 +54,7 @@ export async function prepareItem(req, order, item, existing) {
   item.lineTotal = multiply(quantity, unitPrice)
 }
 
-// Whether a stored item's description is empty or just its part's name, i.e. not typed in by hand
+// Whether the description is empty or just the part's name
 async function describedByPart(item) {
   if (!item.description) return true
   if (!item.part_ID) return false
@@ -73,7 +63,7 @@ async function describedByPart(item) {
   return item.description === part?.name
 }
 
-// Labor is charged at the rate of the order's current mechanic
+// Reprices labor at the new mechanic's rate
 export async function repriceLabor(req, orderID, mechanicID) {
   const { ServiceOrderItems } = cds.entities('workshop')
   const items = await SELECT.from(ServiceOrderItems).columns('ID', 'quantity').where({ order_ID: orderID, itemType_code: 'LABOR' })
@@ -84,9 +74,7 @@ export async function repriceLabor(req, orderID, mechanicID) {
   }
 }
 
-// Sums the order's line totals in the database, so no rounding happens in JavaScript. The sums
-// are rounded to cents anyway: SQLite adds decimals as floating point, so 0.10 + 0.20 would be
-// stored as 0.30000000000000004 and a filter like totalAmount eq 0.3 wouldn't find the order.
+// Recalculates the order's totals, rounded to cents
 export async function updateTotals(orderID) {
   const { ServiceOrders, ServiceOrderItems } = cds.entities('workshop')
   const totals = await SELECT.one.from(ServiceOrderItems).where({ order_ID: orderID }).columns(

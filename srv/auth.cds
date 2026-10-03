@@ -1,12 +1,5 @@
 using { WorkshopService } from './workshop-service';
 
-// Who may do what. Roles:
-//   Manager     customers, vehicles and orders (create, edit, delete, cancel)
-//   Mechanic    order items, start and complete orders
-//   Accountant  invoice completed orders
-//   Admin       everything, including mechanics and parts (prices, hourly rates)
-// Everyone logged in can read all data. Local test users are in package.json.
-
 annotate WorkshopService with @(requires: 'authenticated-user');
 
 annotate WorkshopService.Customers with @(restrict: [

@@ -1,8 +1,6 @@
 import cds from '@sap/cds'
 
-// Reads and locks the order addressed by the request, and rejects the request unless
-// the order is in one of the allowed statuses. The order's key is always the first key
-// in the URL: /ServiceOrders(ID), /ServiceOrders(ID)/items(...), /ServiceOrders(ID)/WorkshopService.start
+// Locks the order and checks its status
 export async function lockOrder(req, ...allowedStatuses) {
   const { ServiceOrders } = cds.entities('workshop')
   const order = await SELECT.one.from(ServiceOrders, req.params[0].ID).forUpdate()
