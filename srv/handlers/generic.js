@@ -7,7 +7,11 @@ export default function (srv) {
   // the before handlers run, and a later req.reject() would replace those errors with its own.
   // So stop right here and report them. This must stay the first handler and synchronous: a
   // synchronous throw ends the before phase before the other handlers are even called.
-  srv.before('*', req => { if (req.errors) req.reject() })
+  // Our own null check runs here too, so its errors are reported together with CAP's.
+  srv.before('*', req => {
+    if (['CREATE', 'UPDATE'].includes(req.event)) assertNoNullDefaults(req, req.target, req.data)
+    if (req.errors) req.reject()
+  })
 
   // Friendly duplicate check for every @assert.unique constraint in the model, e.g.
   // 'License Plate "01KG123ABC" is already in use' (409) instead of a raw database error (500).
@@ -67,6 +71,23 @@ export default function (srv) {
       req.reject(409, key, [usedIn.join(', ')])
     }
   })
+}
+
+// Fields with a default (stock 0, isActive true, ...) may be left out, but not set to null, e.g. a
+// part with stock null would never be flagged for reordering. Neither schema option fits: @mandatory
+// would require the field on CREATE too, and `not null` only gives a raw database error. Includes
+// items sent along with their parent; @readonly fields are skipped, the client can't set them anyway.
+function assertNoNullDefaults(req, entity, data) {
+  for (const row of Array.isArray(data) ? data : [data]) {
+    for (const [name, value] of Object.entries(row ?? {})) {
+      const element = entity.elements[name]
+      if (value === null && element?.default !== undefined && !element['@readonly']) {
+        req.error(400, 'ASSERT_MANDATORY', name)
+      } else if (element?.isComposition) {
+        assertNoNullDefaults(req, element._target, value)
+      }
+    }
+  }
 }
 
 // Trims all string values and uppercases @uppercase ones, including items sent along

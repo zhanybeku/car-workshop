@@ -17,6 +17,7 @@ entity Customers : cuid, managed {
   @assert.format.message: '{i18n>PHONE_INVALID}'
              phone     : String(30);
              vehicles  : Association to many Vehicles on vehicles.owner = $self;
+             orders    : Association to many ServiceOrders on orders.customer = $self;
 }
 
 @assert.unique: {
@@ -87,6 +88,7 @@ entity ServiceOrders : cuid, managed {
   @readonly  status             : Association to OrderStatus default 'OPEN';  // changed only via actions
   @mandatory @assert.target
              vehicle            : Association to Vehicles;
+  @readonly  customer           : Association to Customers;  // vehicle owner at intake, copied by the handler
   @assert.target
              mechanic           : Association to Mechanics;
              complaint          : String(1000);           // what the customer reported

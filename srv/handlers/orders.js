@@ -30,6 +30,7 @@ export default function (srv) {
   // Checks on a new order, and on items sent along with it (deep insert)
   srv.before('CREATE', ServiceOrders, async req => {
     setOrderDate(req)
+    await setCustomer(req, req.data.vehicle_ID)
     if (req.data.mechanic_ID) await assertActiveMechanic(req, req.data.mechanic_ID)
     await assertIntakeMileage(req, req.data.vehicle_ID, req.data.mileageAtIntake)
     for (const item of req.data.items ?? []) await prepareItem(req, req.data, item)
@@ -53,6 +54,7 @@ export default function (srv) {
     if (merged.vehicle_ID !== order.vehicle_ID && order.status_code !== 'OPEN') {
       req.reject(409, 'VEHICLE_LOCKED', 'vehicle_ID', [order.status_code])
     }
+    if (merged.vehicle_ID !== order.vehicle_ID) await setCustomer(req, merged.vehicle_ID)
     if (merged.mechanic_ID !== order.mechanic_ID) mechanicChanged.add(req)
     if (merged.mechanic_ID && merged.mechanic_ID !== order.mechanic_ID) await assertActiveMechanic(req, merged.mechanic_ID)
     if (merged.mileageAtIntake !== order.mileageAtIntake || merged.vehicle_ID !== order.vehicle_ID) {
@@ -79,6 +81,14 @@ export default function (srv) {
 function setOrderDate(req) {
   if (req.event === 'CREATE' || 'orderDate' in req.data) req.data.orderDate ??= today()
   if (req.data.orderDate > today()) req.reject(400, 'ORDER_DATE_IN_FUTURE', 'orderDate')
+}
+
+// The customer is whoever owns the vehicle when it's brought in. Copied instead of looked up through
+// the vehicle, so the order stays with them even if the car is sold later.
+async function setCustomer(req, vehicleID) {
+  const { Vehicles } = cds.entities('workshop')
+  const vehicle = await SELECT.one.from(Vehicles, vehicleID).columns('owner_ID')
+  req.data.customer_ID = vehicle?.owner_ID
 }
 
 // The odometer reading at intake can't be lower than the vehicle's recorded mileage (usually a

@@ -19,21 +19,27 @@ export default function (srv) {
     const items = await SELECT.from(ServiceOrderItems).where({ order_ID: order.ID })
     if (!items.length) return req.reject(409, 'ORDER_HAS_NO_ITEMS')
 
-    // Take the used parts out of stock. The stock condition makes the update affect
-    // 0 rows instead of going negative; rejecting then rolls back all earlier deductions.
+    // Pieces needed per part: items using the same part are added up, so two items of 3 need 6 in stock
+    const needed = new Map()
     for (const item of items.filter(i => i.itemType_code === 'PART')) {
       // SAFETY NET: normally caught earlier, because prepareItem (items.js) rejects part items
       // without a part when they're entered. Only data that bypassed the service gets here.
       if (!item.part_ID) return req.reject(409, 'ITEM_WITHOUT_PART', [item.description ?? item.ID])
+      needed.set(item.part_ID, (needed.get(item.part_ID) ?? 0) + Number(item.quantity))
+    }
 
+    // Take the parts out of stock. The stock condition makes the update affect 0 rows instead of
+    // going negative. Every shortage is reported at once, and rejecting rolls back all deductions.
+    for (const [partID, quantity] of needed) {
       const deducted = await UPDATE(Parts)
-        .with({ stock: { '-=': item.quantity } })
-        .where({ ID: item.part_ID, stock: { '>=': item.quantity } })
+        .with({ stock: { '-=': quantity } })
+        .where({ ID: partID, stock: { '>=': quantity } })
       if (!deducted) {
-        const part = await SELECT.one.from(Parts, item.part_ID).columns('partNumber', 'name', 'stock')
-        return req.reject(409, 'NOT_ENOUGH_STOCK', [part.partNumber, part.name, part.stock, item.quantity])
+        const part = await SELECT.one.from(Parts, partID).columns('partNumber', 'name', 'stock')
+        req.error(409, 'NOT_ENOUGH_STOCK', [part.partNumber, part.name, part.stock, quantity])
       }
     }
+    if (req.errors) return req.reject()
 
     // Record the service on the vehicle
     const vehicle = await SELECT.one.from(Vehicles, order.vehicle_ID).columns('mileage', 'serviceIntervalMonths')
