@@ -8,7 +8,7 @@ export async function lockOrder(req, ...allowedStatuses) {
 
   if (!allowedStatuses.includes(order.status_code)) {
     const key = req.target.name.endsWith('.ServiceOrderItems') ? 'ORDER_ITEMS_LOCKED'
-      : { UPDATE: 'ORDER_NOT_EDITABLE', DELETE: 'ORDER_NOT_DELETABLE' }[req.event] ?? 'ORDER_ACTION_NOT_ALLOWED'
+      : { UPDATE: 'ORDER_NOT_EDITABLE', EDIT: 'ORDER_NOT_EDITABLE', DELETE: 'ORDER_NOT_DELETABLE' }[req.event] ?? 'ORDER_ACTION_NOT_ALLOWED'
     req.reject(409, key, [order.status_code, req.event])
   }
   return order

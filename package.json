@@ -16,6 +16,9 @@
     "features": {
       "assert_integrity": "db"
     },
+    "fiori": {
+      "bypass_draft": true
+    },
     "requires": {
       "[development]": {
         "auth": {

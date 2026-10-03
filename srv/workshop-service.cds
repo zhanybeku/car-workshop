@@ -9,6 +9,7 @@ service WorkshopService {
   entity Parts         as projection on db.Parts;
 
   // Transactional data
+  @odata.draft.enabled
   entity ServiceOrders as projection on db.ServiceOrders actions {
     action start()    returns ServiceOrders;   // OPEN → IN_PROGRESS
     action complete() returns ServiceOrders;   // IN_PROGRESS → COMPLETED

@@ -62,6 +62,9 @@ export default function (srv) {
     }
   })
 
+  // Only OPEN and IN_PROGRESS orders can be edited in Fiori
+  srv.before('EDIT', ServiceOrders, req => lockOrder(req, 'OPEN', 'IN_PROGRESS'))
+
   // Only OPEN orders can be deleted
   srv.before('DELETE', ServiceOrders, req => lockOrder(req, 'OPEN'))
 

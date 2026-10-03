@@ -55,7 +55,7 @@ export async function prepareItem(req, order, item, existing) {
 }
 
 // Whether the description is empty or just the part's name
-async function describedByPart(item) {
+export async function describedByPart(item) {
   if (!item.description) return true
   if (!item.part_ID) return false
   const { Parts } = cds.entities('workshop')
@@ -74,13 +74,12 @@ export async function repriceLabor(req, orderID, mechanicID) {
   }
 }
 
-// Recalculates the order's totals, rounded to cents
-export async function updateTotals(orderID) {
-  const { ServiceOrders, ServiceOrderItems } = cds.entities('workshop')
+// Recalculates the order's totals, rounded to cents (also used for drafts)
+export async function updateTotals(orderID, { ServiceOrders, ServiceOrderItems } = cds.entities('workshop')) {
   const totals = await SELECT.one.from(ServiceOrderItems).where({ order_ID: orderID }).columns(
     `round(coalesce(sum(case when itemType_code = 'PART'  then lineTotal end), 0), 2) as partsTotal`,
     `round(coalesce(sum(case when itemType_code = 'LABOR' then lineTotal end), 0), 2) as laborTotal`,
     `round(coalesce(sum(lineTotal), 0), 2) as totalAmount`,
   )
-  await UPDATE(ServiceOrders, orderID).with(totals)
+  await UPDATE(ServiceOrders).with(totals).where({ ID: orderID })
 }
