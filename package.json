@@ -16,6 +16,22 @@
     "features": {
       "assert_integrity": "db"
     },
+    "requires": {
+      "[development]": {
+        "auth": {
+          "kind": "mocked",
+          "users": {
+            "manager": { "password": "manager", "roles": ["Manager"] },
+            "mechanic": { "password": "mechanic", "roles": ["Mechanic"] },
+            "accountant": { "password": "accountant", "roles": ["Accountant"] },
+            "admin": { "password": "admin", "roles": ["Admin"] },
+            "alice": false, "bob": false, "carol": false, "dave": false,
+            "erin": false, "fred": false, "me": false, "yves": false,
+            "*": false
+          }
+        }
+      }
+    },
     "workshop": {
       "timezone": "UTC"
     }
