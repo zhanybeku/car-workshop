@@ -33,6 +33,7 @@ export default function (srv) {
     await setCustomer(req, req.data.vehicle_ID)
     if (req.data.mechanic_ID) await assertActiveMechanic(req, req.data.mechanic_ID)
     await assertIntakeMileage(req, req.data.vehicle_ID, req.data.mileageAtIntake)
+    await assertOwnItems(req, req.data.items)
     for (const item of req.data.items ?? []) await prepareItem(req, req.data, item)
   })
 
@@ -64,6 +65,7 @@ export default function (srv) {
     // Items sent along with the order (deep update)
     if (req.data.items) {
       const existing = await SELECT.from(ServiceOrderItems).where({ order_ID: order.ID })
+      await assertOwnItems(req, req.data.items, existing)
       for (const item of req.data.items) await prepareItem(req, merged, item, existing.find(e => e.ID === item.ID))
     }
   })
@@ -89,6 +91,16 @@ async function setCustomer(req, vehicleID) {
   const { Vehicles } = cds.entities('workshop')
   const vehicle = await SELECT.one.from(Vehicles, vehicleID).columns('owner_ID')
   req.data.customer_ID = vehicle?.owner_ID
+}
+
+// Items sent along with an order must be new or already belong to it. An ID taken by another
+// order's item would otherwise reach the database as a duplicate key and fail with a 500.
+async function assertOwnItems(req, items = [], existing = []) {
+  const others = items.map(i => i.ID).filter(ID => ID && !existing.some(e => e.ID === ID))
+  if (!others.length) return
+  const { ServiceOrderItems } = cds.entities('workshop')
+  const taken = await SELECT.one.from(ServiceOrderItems).columns('ID').where({ ID: { in: others } })
+  if (taken) req.reject(409, 'ITEM_OF_OTHER_ORDER', 'items', [taken.ID])
 }
 
 // The odometer reading at intake can't be lower than the vehicle's recorded mileage (usually a

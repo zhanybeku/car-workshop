@@ -45,7 +45,11 @@ export async function prepareItem(req, order, item, existing) {
       // the service gets here; without this, `part.unitPrice` below would fail with a 500.
       if (!part) req.reject(400, 'PART_NOT_FOUND')
       unitPrice = part.unitPrice
-      if (!existing && !item.description) item.description = part.name
+
+      // The description defaults to the part's name. When the part is switched, a description filled
+      // in that way follows the new part; one typed in by hand, or sent with this change, is kept.
+      const fill = !existing || changed('description') ? !item.description : await describedByPart(existing)
+      if (fill) item.description = part.name
     }
   } else if (itemType_code === 'LABOR') {
     if (part_ID) req.reject(400, 'LABOR_WITH_PART')
@@ -60,6 +64,15 @@ export async function prepareItem(req, order, item, existing) {
   item.lineTotal = multiply(quantity, unitPrice)
 }
 
+// Whether a stored item's description is empty or just its part's name, i.e. not typed in by hand
+async function describedByPart(item) {
+  if (!item.description) return true
+  if (!item.part_ID) return false
+  const { Parts } = cds.entities('workshop')
+  const part = await SELECT.one.from(Parts, item.part_ID).columns('name')
+  return item.description === part?.name
+}
+
 // Labor is charged at the rate of the order's current mechanic
 export async function repriceLabor(req, orderID, mechanicID) {
   const { ServiceOrderItems } = cds.entities('workshop')
@@ -71,13 +84,15 @@ export async function repriceLabor(req, orderID, mechanicID) {
   }
 }
 
-// Sums the order's line totals in the database, so no rounding happens in JavaScript
+// Sums the order's line totals in the database, so no rounding happens in JavaScript. The sums
+// are rounded to cents anyway: SQLite adds decimals as floating point, so 0.10 + 0.20 would be
+// stored as 0.30000000000000004 and a filter like totalAmount eq 0.3 wouldn't find the order.
 export async function updateTotals(orderID) {
   const { ServiceOrders, ServiceOrderItems } = cds.entities('workshop')
   const totals = await SELECT.one.from(ServiceOrderItems).where({ order_ID: orderID }).columns(
-    `coalesce(sum(case when itemType_code = 'PART'  then lineTotal end), 0) as partsTotal`,
-    `coalesce(sum(case when itemType_code = 'LABOR' then lineTotal end), 0) as laborTotal`,
-    `coalesce(sum(lineTotal), 0) as totalAmount`,
+    `round(coalesce(sum(case when itemType_code = 'PART'  then lineTotal end), 0), 2) as partsTotal`,
+    `round(coalesce(sum(case when itemType_code = 'LABOR' then lineTotal end), 0), 2) as laborTotal`,
+    `round(coalesce(sum(lineTotal), 0), 2) as totalAmount`,
   )
   await UPDATE(ServiceOrders, orderID).with(totals)
 }
