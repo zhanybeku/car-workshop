@@ -1,0 +1,13 @@
+ID;partNumber;name;description;unitPrice;stock;minStock;createdAt;createdBy;modifiedAt;modifiedBy
+f5f0e3e7-7570-5be7-8862-8b6670135c0c;OIL-5W30-4L;Engine Oil 5W-30 (4 L);Fully synthetic motor oil;38.00;20;8;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+981ab0cc-4e88-5a2c-b9d7-99f7ee7428b8;OF-UNI-01;Oil Filter;Spin-on oil filter;9.50;15;5;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+33f0bf6d-02df-5afe-9a51-9a8962cf4321;AF-UNI-02;Air Filter;Engine air filter;14.00;6;5;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+6d11fb59-8143-5c17-bf63-ba46838771e3;CF-UNI-03;Cabin Filter;Cabin air filter with activated carbon;12.00;3;5;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+599e1690-2396-5db0-9868-6accd9ca84c7;BP-FR-01;Front Brake Pads;Ceramic brake pad set, front axle;55.00;8;4;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+24fe4240-06f8-594e-b72d-b50ff945eac1;BD-FR-01;Front Brake Disc;Ventilated brake disc, front;72.00;4;2;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+583a84b1-fcc8-5a08-943e-bc6812158586;SP-NGK-IR;Spark Plug Iridium;NGK iridium spark plug;11.00;24;12;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+f68ba0a0-ef68-5376-8869-1f0c6f8a148a;WB-600;Wiper Blade 60 cm;Flat wiper blade;9.00;2;6;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+c8f2a0da-fbc4-5ba1-96fb-0d450abf1352;BAT-60AH;Battery 60 Ah;12 V car battery, 540 A;110.00;5;2;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+7abcb9e5-1d8f-5f8f-ba51-a1dc64e155ed;CL-G12-1L;Coolant G12 (1 L);Antifreeze concentrate;7.50;18;10;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+3b44329a-dae9-570a-8508-4ad7b20d3f37;BF-DOT4-1L;Brake Fluid DOT 4 (1 L);Brake fluid;8.00;10;5;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+13a50aba-800a-5893-b291-362444b1d1c6;TB-KIT-01;Timing Belt Kit;Timing belt, tensioner and water pump;145.00;1;2;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin

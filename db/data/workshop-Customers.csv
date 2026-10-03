@@ -1,0 +1,7 @@
+ID;firstName;lastName;email;phone;createdAt;createdBy;modifiedAt;modifiedBy
+8c300bf8-ac48-5dd9-bd6c-49a34f8565d6;Aibek;Toktogulov;aibek.toktogulov@example.com;+996 555 112 233;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+504266c8-de67-50a2-9b1b-ef0c02794525;Aizada;Sadykova;aizada.sadykova@example.com;+996 700 445 566;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+c11d14c9-fc92-5796-90f7-48fd8feea188;Nurlan;Asanov;;+996 772 908 070;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+6c90e65a-c6c2-5423-a54b-74c430d2f257;Elena;Petrova;elena.petrova@example.com;+996 555 778 899;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+abe75e03-4f6e-571d-84ae-cfed3e892039;Timur;Bekov;timur.bekov@example.com;;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+fa4653ae-f29f-5196-b7f9-baa425aab34e;Dinara;Usenova;dinara.usenova@example.com;+996 707 334 455;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin

@@ -1,0 +1,6 @@
+ID;firstName;lastName;specialization;hourlyRate;isActive;createdAt;createdBy;modifiedAt;modifiedBy
+e93c138b-2ecb-5401-87d3-7c8859b067a0;Bakyt;Mamatov;Engine;40.00;true;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+da25676a-c4cd-58c0-bfcd-155e233b1817;Ruslan;Ibraimov;Brakes & Suspension;35.00;true;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+619d0c11-b3d5-5003-8510-793d03793e79;Sergei;Kim;Electrical;45.00;true;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+1c9d2187-45a1-540c-80cd-05499555f31a;Azamat;Jumabaev;General Service;30.00;true;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
+b7aef43c-eff5-5415-abb2-a2514b9b7475;Oleg;Smirnov;Diagnostics;38.00;false;2026-05-04T08:00:00Z;admin;2026-05-04T08:00:00Z;admin
