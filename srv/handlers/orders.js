@@ -19,7 +19,9 @@ export default function (srv) {
     // Lock the counter row so parallel requests wait instead of reading the same number
     const range = await SELECT.one.from(NumberRanges).where({ prefix }).forUpdate()
     const next = (range?.lastNumber ?? 0) + 1
-    if (next > 999999) return req.error(400, 'ORDER_NUMBERS_EXHAUSTED', [prefix])
+    // SAFETY NET: numbers restart every year, so this needs over 999,999 orders in one year.
+    // A 7-digit number wouldn't fit orderNumber (String(14)).
+    if (next > 999999) req.reject(409, 'ORDER_NUMBERS_EXHAUSTED', [prefix])
 
     if (range) await UPDATE(NumberRanges, prefix).with({ lastNumber: next })
     else await INSERT.into(NumberRanges).entries({ prefix, lastNumber: next })

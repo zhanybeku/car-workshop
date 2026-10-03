@@ -57,7 +57,7 @@ export default function (srv) {
   srv.on('invoice', ServiceOrders, async req => {
     await lockOrder(req, 'COMPLETED')
 
-    await UPDATE(req.subject).with({ status_code: 'INVOICED' })
+    await UPDATE(req.subject).with({ status_code: 'INVOICED', invoicedAt: req.timestamp })
     return SELECT.one.from(req.subject)
   })
 
@@ -65,7 +65,7 @@ export default function (srv) {
     await lockOrder(req, 'OPEN', 'IN_PROGRESS')
 
     // Empty or whitespace-only reasons are already rejected by @mandatory in the CDS
-    await UPDATE(req.subject).with({ status_code: 'CANCELLED', cancellationReason: req.data.reason.trim() })
+    await UPDATE(req.subject).with({ status_code: 'CANCELLED', cancelledAt: req.timestamp, cancellationReason: req.data.reason.trim() })
     return SELECT.one.from(req.subject)
   })
 }

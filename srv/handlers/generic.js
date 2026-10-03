@@ -34,8 +34,8 @@ export default function (srv) {
 
       const duplicate = await SELECT.one.from(req.target).columns('ID').where({ ...values, ID: { '!=': req.data.ID } })
       if (duplicate) {
-        const label = fields.map(f => elements[f]['@title'] ?? f).join(' + ')
-        req.reject(409, 'ALREADY_IN_USE', fields[0], [label, Object.values(values).join(' + ')])
+        const fieldNames = fields.map(f => elements[f]['@title'] ?? f).join(' + ')
+        req.reject(409, 'ALREADY_IN_USE', fields[0], [fieldNames, Object.values(values).join(' + ')])
       }
     }
   })

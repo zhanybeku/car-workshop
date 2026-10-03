@@ -97,6 +97,8 @@ entity ServiceOrders : cuid, managed {
              mileageAtIntake    : Integer;
   @readonly  startedAt          : Timestamp;
   @readonly  completedAt        : Timestamp;
+  @readonly  invoicedAt         : Timestamp;
+  @readonly  cancelledAt        : Timestamp;
   @readonly  cancellationReason : String(500);
   @readonly  partsTotal         : Decimal(10, 2);
   @readonly  laborTotal         : Decimal(10, 2);
