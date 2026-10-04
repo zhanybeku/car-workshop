@@ -53,6 +53,8 @@ annotate service.ServiceOrders with @(
     { Value: orderDate },
     { Value: vehicle_ID },
     { Value: customer_ID },
+    { Value: vehicle.mileage, Label: '{i18n>RecordedMileage}', ![@Common.FieldControl]: #ReadOnly,
+      ![@UI.Hidden]: { $edmJson: { $Eq: [{ $Path: 'vehicle_ID' }, { $Null: null }] } } },
     { Value: mileageAtIntake },
     { Value: mechanic_ID },
     { Value: complaint }
@@ -79,7 +81,7 @@ annotate service.ServiceOrders with @(
 
 // Refresh live values while editing (calculated in srv/handlers/drafts.js)
 annotate service.ServiceOrders with @(
-  Common.SideEffects #Vehicle:  { SourceProperties: [vehicle_ID],  TargetProperties: ['customer_ID'] },
+  Common.SideEffects #Vehicle:  { SourceProperties: [vehicle_ID],  TargetProperties: ['customer_ID'], TargetEntities: [vehicle] },
   Common.SideEffects #Mechanic: { SourceProperties: [mechanic_ID], TargetEntities: [items], TargetProperties: ['partsTotal', 'laborTotal', 'totalAmount'] },
   Common.SideEffects #Items:    { SourceEntities: [items],         TargetEntities: [items], TargetProperties: ['partsTotal', 'laborTotal', 'totalAmount'] }
 );

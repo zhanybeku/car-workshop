@@ -63,6 +63,7 @@
             "settings": {
               "contextPath": "/ServiceOrders",
               "editableHeaderContent": false,
+              "enhanceI18n": "i18n/i18n.properties",
               "controlConfiguration": {
                 "items/@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": { "type": "ResponsiveTable", "creationMode": { "name": "Inline" } }
