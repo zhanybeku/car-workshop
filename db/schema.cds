@@ -1,21 +1,29 @@
 namespace workshop;
 
-using { cuid, managed, sap.common.CodeList } from '@sap/cds/common';
+using {
+  cuid,
+  managed,
+  sap.common.CodeList
+} from '@sap/cds/common';
 
 // Master data
 
 entity Customers : cuid, managed {
   @mandatory firstName : String(50);
   @mandatory lastName  : String(50);
-             fullName  : String(101) = firstName || ' ' || lastName;
-  @assert.format: '^[^ @]+@[^ @]+[.][^ @]+$'
+  fullName             : String(101) = firstName || ' ' || lastName;
+
+  @assert.format        : '^[^ @]+@[^ @]+[.][^ @]+$'
   @assert.format.message: '{i18n>EMAIL_INVALID}'
-             email     : String(100);
-  @assert.format: '^[+]?(?=(?:[^0-9]*[0-9]){5})[0-9 ()-]+$'   // at least 5 digits
+  email                : String(100);
+
+  @assert.format        : '^[+]?(?=(?:[^0-9]*[0-9]){5})[0-9 ()-]+$' // at least 5 digits
   @assert.format.message: '{i18n>PHONE_INVALID}'
-             phone     : String(30);
-             vehicles  : Association to many Vehicles on vehicles.owner = $self;
-             orders    : Association to many ServiceOrders on orders.customer = $self;
+  phone                : String(30);
+  vehicles             : Association to many Vehicles
+                           on vehicles.owner = $self;
+  orders               : Association to many ServiceOrders
+                           on orders.customer = $self;
 }
 
 @assert.unique: {
@@ -23,95 +31,132 @@ entity Customers : cuid, managed {
   vin         : [vin]
 }
 entity Vehicles : cuid, managed {
-  @mandatory @title: 'License Plate' @uppercase
-             licensePlate          : String(15);
-  @mandatory @title: 'VIN' @uppercase
-  @assert.format: '^[A-HJ-NPR-Z0-9]{17}$'
+  @mandatory  @title: 'License Plate'  @uppercase
+  licensePlate             : String(15);
+
+  @mandatory  @title: 'VIN'            @uppercase
+  @assert.format        : '^[A-HJ-NPR-Z0-9]{17}$'
   @assert.format.message: '{i18n>VIN_INVALID}'
-             vin                   : String(17);
-  @mandatory make                  : String(40);
-  @mandatory model                 : String(40);
-             year                  : Integer;
-  @assert.range: [0, _]
-  @assert.range.message: '{i18n>MILEAGE_NEGATIVE}'
-             mileage               : Integer default 0;   // km
-  @assert.range: [1, 120]
-  @assert.range.message: '{i18n>SERVICE_INTERVAL_RANGE}'
-             serviceIntervalMonths : Integer default 12;
-             lastServiceDate       : Date;
-  @readonly  nextServiceDue        : Date;
-  @mandatory @assert.target
-             owner                 : Association to Customers;
-             orders                : Association to many ServiceOrders on orders.vehicle = $self;
+  vin                      : String(17);
+  @mandatory make          : String(40);
+  @mandatory model         : String(40);
+  year                     : Integer;
+
+  @assert.range         : [
+    0,
+    _
+  ]
+  @assert.range.message : '{i18n>MILEAGE_NEGATIVE}'
+  mileage                  : Integer default 0; // km
+
+  @assert.range         : [
+    1,
+    120
+  ]
+  @assert.range.message : '{i18n>SERVICE_INTERVAL_RANGE}'
+  serviceIntervalMonths    : Integer default 12;
+  lastServiceDate          : Date;
+  @readonly nextServiceDue : Date;
+
+  @mandatory  @assert.target
+  owner                    : Association to Customers;
+  orders                   : Association to many ServiceOrders
+                               on orders.vehicle = $self;
 }
 
 entity Mechanics : cuid, managed {
-  @mandatory firstName      : String(50);
-  @mandatory lastName       : String(50);
-             fullName       : String(101) = firstName || ' ' || lastName;
-             specialization : String(60);
-  @mandatory @assert.range: [(0), _]
+  @mandatory firstName : String(50);
+  @mandatory lastName  : String(50);
+  fullName             : String(101) = firstName || ' ' || lastName;
+  specialization       : String(60);
+
+  @mandatory  @assert.range: [
+    (0),
+    _
+  ]
   @assert.range.message: '{i18n>HOURLY_RATE_NOT_POSITIVE}'
-             hourlyRate     : Decimal(10, 2);
-             isActive       : Boolean default true;
-             orders         : Association to many ServiceOrders on orders.mechanic = $self;
+  hourlyRate           : Decimal(10, 2);
+  isActive             : Boolean default true;
+  orders               : Association to many ServiceOrders
+                           on orders.mechanic = $self;
 }
 
-@assert.unique: { partNumber: [partNumber] }
+@assert.unique: {partNumber: [partNumber]}
 entity Parts : cuid, managed {
-  @mandatory @title: 'Part Number' @uppercase
-             partNumber  : String(20);
-  @mandatory name        : String(100);
-             description : String(500);
-  @mandatory @assert.range: [0, _]
+  @mandatory  @title       : 'Part Number'  @uppercase
+  partNumber      : String(20);
+  @mandatory name : String(100);
+  description     : String(500);
+
+  @mandatory  @assert.range: [
+    0,
+    _
+  ]
   @assert.range.message: '{i18n>PRICE_NEGATIVE}'
-             unitPrice   : Decimal(10, 2);
-  @assert.range: [0, _]
+  unitPrice       : Decimal(10, 2);
+
+  @assert.range        : [
+    0,
+    _
+  ]
   @assert.range.message: '{i18n>STOCK_NEGATIVE}'
-             stock       : Integer default 0;
-  @assert.range: [0, _]
+  stock           : Integer default 0;
+
+  @assert.range        : [
+    0,
+    _
+  ]
   @assert.range.message: '{i18n>MIN_STOCK_NEGATIVE}'
-             minStock    : Integer default 5;
-             needsReorder: Boolean = stock < minStock;
+  minStock        : Integer default 5;
+  needsReorder    : Boolean = stock < minStock;
 }
 
 // Transactional data
 
-@assert.unique: { orderNumber: [orderNumber] }
+@assert.unique: {orderNumber: [orderNumber]}
 entity ServiceOrders : cuid, managed {
-  @readonly  orderNumber        : String(14);             // e.g. SO-2026-000001
-             orderDate          : Date;
-  @readonly  status             : Association to OrderStatus default 'OPEN';
-  @mandatory @assert.target
-             vehicle            : Association to Vehicles;
-  @readonly  customer           : Association to Customers;
+  @readonly orderNumber        : String(14); // e.g. SO-2026-000001
+  orderDate                    : Date;
+  @readonly status             : Association to OrderStatus default 'OPEN';
+
+  @mandatory  @assert.target
+  vehicle                      : Association to Vehicles;
+  @readonly customer           : Association to Customers;
+
   @assert.target
-             mechanic           : Association to Mechanics;
-             complaint          : String(1000);
-  @assert.range: [0, _]
+  mechanic                     : Association to Mechanics;
+  complaint                    : String(1000);
+
+  @assert.range        : [
+    0,
+    _
+  ]
   @assert.range.message: '{i18n>MILEAGE_NEGATIVE}'
-             mileageAtIntake    : Integer;
-  @readonly  startedAt          : Timestamp;
-  @readonly  completedAt        : Timestamp;
-  @readonly  invoicedAt         : Timestamp;
-  @readonly  cancelledAt        : Timestamp;
-  @readonly  cancellationReason : String(500);
-  @readonly  partsTotal         : Decimal(10, 2);
-  @readonly  laborTotal         : Decimal(10, 2);
-  @readonly  totalAmount        : Decimal(10, 2);
-             items              : Composition of many ServiceOrderItems on items.order = $self;
+  mileageAtIntake              : Integer;
+  @readonly startedAt          : Timestamp;
+  @readonly completedAt        : Timestamp;
+  @readonly invoicedAt         : Timestamp;
+  @readonly cancelledAt        : Timestamp;
+  @readonly cancellationReason : String(500);
+  @readonly partsTotal         : Decimal(10, 2);
+  @readonly laborTotal         : Decimal(10, 2);
+  @readonly totalAmount        : Decimal(10, 2);
+  items                        : Composition of many ServiceOrderItems
+                                   on items.order = $self;
 }
 
 entity ServiceOrderItems : cuid {
-             order       : Association to ServiceOrders;
+  order               : Association to ServiceOrders;
+
   @assert.target
-             itemType    : Association to ItemTypes default 'PART';
+  itemType            : Association to ItemTypes default 'PART';
+
   @assert.target
-             part        : Association to Parts;
-             description : String(200);
-             quantity    : Decimal(10, 2) default 1;      // pieces for parts, hours for labor
-  @readonly  unitPrice   : Decimal(10, 2);
-  @readonly  lineTotal   : Decimal(10, 2);
+  part                : Association to Parts;
+  description         : String(200);
+  quantity            : Decimal(10, 2) default 1; // pieces for parts, hours for labor
+  @readonly unitPrice : Decimal(10, 2);
+  @readonly lineTotal : Decimal(10, 2);
 }
 
 // Code lists

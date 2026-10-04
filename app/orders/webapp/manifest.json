@@ -33,13 +33,25 @@
       "": {
         "dataSource": "mainService",
         "preload": true,
-        "settings": { "operationMode": "Server", "autoExpandSelect": true, "earlyRequests": true }
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
       }
     },
     "routing": {
       "routes": [
-        { "pattern": ":?query:", "name": "ServiceOrdersList", "target": "ServiceOrdersList" },
-        { "pattern": "ServiceOrders({key}):?query:", "name": "ServiceOrdersObjectPage", "target": "ServiceOrdersObjectPage" }
+        {
+          "pattern": ":?query:",
+          "name": "ServiceOrdersList",
+          "target": "ServiceOrdersList"
+        },
+        {
+          "pattern": "ServiceOrders({key}):?query:",
+          "name": "ServiceOrdersObjectPage",
+          "target": "ServiceOrdersObjectPage"
+        }
       ],
       "targets": {
         "ServiceOrdersList": {
@@ -51,7 +63,11 @@
               "contextPath": "/ServiceOrders",
               "variantManagement": "Page",
               "initialLoad": "Enabled",
-              "navigation": { "ServiceOrders": { "detail": { "route": "ServiceOrdersObjectPage" } } }
+              "navigation": {
+                "ServiceOrders": {
+                  "detail": { "route": "ServiceOrdersObjectPage" }
+                }
+              }
             }
           }
         },
@@ -66,7 +82,10 @@
               "enhanceI18n": "i18n/i18n.properties",
               "controlConfiguration": {
                 "items/@com.sap.vocabularies.UI.v1.LineItem": {
-                  "tableSettings": { "type": "ResponsiveTable", "creationMode": { "name": "Inline" } }
+                  "tableSettings": {
+                    "type": "ResponsiveTable",
+                    "creationMode": { "name": "Inline" }
+                  }
                 }
               }
             }

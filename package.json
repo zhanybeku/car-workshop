@@ -24,12 +24,38 @@
         "auth": {
           "kind": "mocked",
           "users": {
-            "manager": { "password": "manager", "roles": ["Manager"] },
-            "mechanic": { "password": "mechanic", "roles": ["Mechanic"] },
-            "accountant": { "password": "accountant", "roles": ["Accountant"] },
-            "admin": { "password": "admin", "roles": ["Admin"] },
-            "alice": false, "bob": false, "carol": false, "dave": false,
-            "erin": false, "fred": false, "me": false, "yves": false,
+            "manager": {
+              "password": "manager",
+              "roles": [
+                "Manager"
+              ]
+            },
+            "mechanic": {
+              "password": "mechanic",
+              "roles": [
+                "Mechanic"
+              ]
+            },
+            "accountant": {
+              "password": "accountant",
+              "roles": [
+                "Accountant"
+              ]
+            },
+            "admin": {
+              "password": "admin",
+              "roles": [
+                "Admin"
+              ]
+            },
+            "alice": false,
+            "bob": false,
+            "carol": false,
+            "dave": false,
+            "erin": false,
+            "fred": false,
+            "me": false,
+            "yves": false,
             "*": false
           }
         }
