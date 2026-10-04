@@ -35,6 +35,7 @@ export default function (srv) {
 
   // Checks on an order update, only for values that really change
   srv.before('UPDATE', ServiceOrders, async req => {
+    dropReadonly(req)
     const order = await lockOrder(req, 'OPEN', 'IN_PROGRESS')
     const merged = { ...order, ...req.data }
     setOrderDate(req)
@@ -73,6 +74,14 @@ export default function (srv) {
     if (req.mechanicChanged) await repriceLabor(req, req.data.ID, req.data.mechanic_ID)
     await updateTotals(req.data.ID)
   })
+}
+
+// Keeps server-set values when a saved draft sends them back
+function dropReadonly(req) {
+  for (const name in req.data) {
+    const element = req.target.elements[name]
+    if (element?.['@readonly'] && !element['@cds.on.insert'] && !element['@cds.on.update']) delete req.data[name]
+  }
 }
 
 // Order date defaults to today, never in the future
