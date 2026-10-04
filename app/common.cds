@@ -58,7 +58,15 @@ annotate service.ServiceOrders with {
                          { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'mileage' }
                        ]
                      };
-  customer           @title: '{i18n>Customer}'  @Common.Text: customer.fullName  @Common.TextArrangement: #TextOnly;
+  customer           @title: '{i18n>Customer}'  @Common.Text: customer.fullName  @Common.TextArrangement: #TextOnly
+                     @Common.ValueList: {
+                       CollectionPath: 'Customers',
+                       Parameters: [
+                         { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: customer_ID, ValueListProperty: 'ID' },
+                         { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'phone' },
+                         { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'email' }
+                       ]
+                     };
   mechanic           @title: '{i18n>Mechanic}'  @Common.Text: mechanic.fullName  @Common.TextArrangement: #TextOnly
                      @Common.ValueList: {
                        CollectionPath: 'Mechanics',
