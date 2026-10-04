@@ -3,7 +3,9 @@ using { workshop as db } from '../db/schema';
 service WorkshopService {
 
   // Master data
+  @odata.draft.enabled
   entity Customers     as projection on db.Customers;
+  @odata.draft.enabled
   entity Vehicles      as projection on db.Vehicles;
   entity Mechanics     as projection on db.Mechanics;
   entity Parts         as projection on db.Parts;

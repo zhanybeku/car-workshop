@@ -3,7 +3,7 @@ using WorkshopService as service from '../srv/workshop-service';
 // Labels, texts and value helps shared by all apps
 
 annotate service.Customers with {
-  ID        @Common.Text: fullName  @Common.TextArrangement: #TextOnly;
+  ID        @Core.Computed  @Common.Text: fullName  @Common.TextArrangement: #TextOnly;
   firstName @title: '{i18n>FirstName}';
   lastName  @title: '{i18n>LastName}';
   fullName  @title: '{i18n>FullName}';
@@ -12,7 +12,7 @@ annotate service.Customers with {
 }
 
 annotate service.Vehicles with {
-  ID                    @Common.Text: licensePlate  @Common.TextArrangement: #TextOnly;
+  ID                    @Core.Computed  @Common.Text: licensePlate  @Common.TextArrangement: #TextOnly;
   make                  @title: '{i18n>Make}';
   model                 @title: '{i18n>Model}';
   year                  @title: '{i18n>Year}';
@@ -20,7 +20,15 @@ annotate service.Vehicles with {
   serviceIntervalMonths @title: '{i18n>ServiceInterval}';
   lastServiceDate       @title: '{i18n>LastServiceDate}';
   nextServiceDue        @title: '{i18n>NextServiceDue}';
-  owner                 @title: '{i18n>Owner}'  @Common.Text: owner.fullName  @Common.TextArrangement: #TextOnly;
+  owner                 @title: '{i18n>Owner}'  @Common.Text: owner.fullName  @Common.TextArrangement: #TextOnly
+                        @Common.ValueList: {
+                          CollectionPath: 'Customers',
+                          Parameters: [
+                            { $Type: 'Common.ValueListParameterInOut', LocalDataProperty: owner_ID, ValueListProperty: 'ID' },
+                            { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'phone' },
+                            { $Type: 'Common.ValueListParameterDisplayOnly', ValueListProperty: 'email' }
+                          ]
+                        };
 }
 
 annotate service.Mechanics with {
